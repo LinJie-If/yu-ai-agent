@@ -32,7 +32,13 @@ class LoveAppTest {
         Assertions.assertNotNull(answer);
     }
 
+
+
     @Test
-    void doChat() {
+    void doChatWithReport() {
+        String chatId = UUID.randomUUID().toString();
+        String message = "你好，我是程序员临界if,我想让Obsidian对我好点，但是我不知道该怎么做";
+        LoveApp.LoveReport loveReport = loveApp.doChatWithReport(message, chatId);
+        Assertions.assertNotNull(loveReport);
     }
 }
