@@ -3,17 +3,24 @@ package com.example.yuaiagent.app;
 import com.example.yuaiagent.advisor.MyLoggerAdvisor;
 import com.example.yuaiagent.advisor.ReReadingAdvisor;
 import com.example.yuaiagent.chatmemory.FileBaseChatMemory;
+import com.example.yuaiagent.rag.LoveAppRagCloudAdvisorConfig;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.vectorstore.VectorStore;
+//import org.springframework.aop.Advisor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Vector;
 
 import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY;
 import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY;
@@ -85,6 +92,33 @@ public class LoveApp {
                 .entity(LoveReport.class);
             log.info("loveReport: {}", loveReport);
             return loveReport;
+
+    }
+
+
+    // rag-AI 恋爱知识问答功能
+    @Resource
+    private VectorStore loveAppVectorStore;
+
+    @Resource
+    private Advisor loveAppRagCloudAdvisor;
+
+    public String doChatWithRag(String message, String chatId){
+        ChatResponse chatResponse = chatClient
+                .prompt()
+                .user(message)
+                // ?-保存对话记忆，并且加载最近的10条
+                .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId).param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
+                //
+                .advisors(new MyLoggerAdvisor())
+                .advisors(new QuestionAnswerAdvisor(loveAppVectorStore))
+//                .advisors(loveAppRagCloudAdvisor)
+                .call()
+                .chatResponse();
+        String content = chatResponse.getResult().getOutput().getText();
+        log.info("content: {}", content);
+        return content;
+
 
     }
 
