@@ -80,4 +80,16 @@ class LoveAppTest {
         Assertions.assertNotNull(answer);
     }
 
+    // 测试高德地图mcp
+    @Test
+    void doChatWithMcp() {
+        String chatId = UUID.randomUUID().toString();
+//        String message = "我的另一半居住在上海静安区，请帮我找到 5 公里内合适的约会地点";
+//        String answer = loveApp.doChatWithTools(message, chatId);
+
+        // 测试图片mcp服务
+        String message = "帮我搜索一些编程导航程序员鱼皮的图片";
+        String answer = loveApp.doChatWithTools(message, chatId);
+        Assertions.assertNotNull(answer);
+    }
 }
